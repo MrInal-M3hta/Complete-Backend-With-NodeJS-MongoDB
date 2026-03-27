@@ -7,8 +7,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 // TODO: toggle subscription
 const toggleSubscription = asyncHandler(async (req, res) => {
-  const { channelId } = req.params;
-  const userId = req.user?._id;
+  const { channelId } = req.params; // channel user wants to subscribe
+  const userId = req.user?._id; // logged-in user
 
   // validation
   if (!isValidObjectId(channelId)) {
@@ -30,6 +30,52 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     subscriber: userId,
     channel: channelId,
   });
+/*
+  Explaination of this code line:
+  const existing = await Subscription.findOne({
+    subscriber: userId,
+    channel: channelId,
+  });
+
+  How data is Stored?
+  My Schema:
+    {
+        subscriber: ObjectID, // user who is subscribing
+        channel: ObjectID // channel being followed
+    }
+
+  Example:
+    If user1 subscribed to user2, DB stoes:
+    {
+        subscriber: "user1",
+        channel: "user2"
+    }
+
+  Now what our query means:
+    you are asking MongoDB:
+      Is there ANY document where:
+        subscriber = this user 
+      AND
+        channel = this channel
+      ?
+
+  Now we have two Possible Outcome:
+    case 1 : Document Found
+      Result:
+          existing = {
+            _id: "...",
+            subscriber: "user1",
+            channel: "user2"
+          }
+      Meaning: YES -> user already subscribed
+
+    case 2 : Document NOT Found 
+      Result:
+          existing = null
+      DB Does not contain:
+          {subscriber: "user1", channel: "user2"}
+      Meaning: NO -> user is NOT subscribed
+*/
 
   let isSubscribed;
 
@@ -60,6 +106,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
+
+  const channel = await User.findById(channelId);
+  if (!channel) throw new ApiError(404, "Channel not found");
 
   if (!isValidObjectId(channelId)) {
     throw new ApiError(400, "Invalid channel ID");

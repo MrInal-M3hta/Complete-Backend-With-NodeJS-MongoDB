@@ -20,6 +20,7 @@ const createTweet = asyncHandler(async (req, res) => {
   const createdTweet = await Tweet.findById(tweet._id).populate(
     "owner",
     "username fullName avatar",
+    // .populate("owner").select("username fullName avatar")
   );
 
   return res
@@ -28,20 +29,87 @@ const createTweet = asyncHandler(async (req, res) => {
 });
 
 const getUserTweets = asyncHandler(async (req, res) => {
-  // TODO: get user tweets
+  // TODO: get user tweets and likes
   const { userId } = req.params;
+  const currentUserId = req.user._id;
 
   if (!isValidObjectId(userId)) {
     throw new ApiError(400, "Invalid user ID");
   }
 
-  const tweets = await Tweet.find({ owner: userId })
-    .populate("owner", "username fullName avatar")
-    .sort({ createdAt: -1 });
+  const tweets = await Tweet.aggregate([
+    // 1. Match tweets of this user
+    {
+      $match: {
+        owner: new mongoose.Types.ObjectId(userId),
+      },
+    },
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, tweets, "User tweets fetched successfully"));
+    // 2. Lookup likes
+    {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "tweet",
+        as: "likes",
+      },
+    },
+
+    // 3. Add like count + isLiked
+    {
+      $addFields: {
+        totalLikes: { $size: "$likes" },
+
+        isLiked: {
+          $cond: {
+            if: {
+              $in: [
+                new mongoose.Types.ObjectId(currentUserId),
+                "$likes.likedBy",
+              ],
+            },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+
+    // 4. Lookup owner (user)
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      },
+    },
+    { $unwind: "$owner" },
+
+    // 5. Clean response
+    {
+      $project: {
+        content: 1,
+        createdAt: 1,
+        totalLikes: 1,
+        isLiked: 1,
+        owner: {
+          _id: "$owner._id",
+          username: "$owner.username",
+          avatar: "$owner.avatar",
+        },
+      },
+    },
+
+    // 6. Sort latest first
+    {
+      $sort: { createdAt: -1 },
+    },
+  ]);
+
+  return res.status(200).json(
+    new ApiResponse(200, tweets, "User tweets fetched successfully")
+  );
 });
 
 const updateTweet = asyncHandler(async (req, res) => {
@@ -92,6 +160,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
 
   // 🔥 Ownership check
   if (tweet.owner.toString() !== req.user._id.toString()) {
+    // Why we use .toString() method because "They are objects, not primitive values".
     throw new ApiError(403, "You can only delete your own tweets");
   }
 

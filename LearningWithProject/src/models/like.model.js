@@ -3,19 +3,23 @@ import mongoose, {Schema} from "mongoose";
 const likeSchema = new Schema({
     video: {
         type: Schema.Types.ObjectId,
-        ref: "Video"
+        ref: "Video",
+        index: true // Add Index for performance
     },
     comment: {
         type: Schema.Types.ObjectId,
-        ref: "Comment"
+        ref: "Comment",
+        index: true // Add Index for performance
     },
     tweet: {
         type: Schema.Types.ObjectId,
-        ref: "Tweet"
+        ref: "Tweet",
+        index: true // Add Index for performance
     },
     likedBy: {
         type: Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
+        index: true // Add Index for performance
     },
     
 }, {timestamps: true})

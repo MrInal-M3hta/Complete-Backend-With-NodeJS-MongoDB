@@ -4,8 +4,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-const createPlaylist = asyncHandler(async (req, res) => {
   //TODO: create playlist
+const createPlaylist = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
 
   if (!name?.trim() || !description?.trim()) {
@@ -23,8 +23,8 @@ const createPlaylist = asyncHandler(async (req, res) => {
   );
 });
 
-const getUserPlaylists = asyncHandler(async (req, res) => {
   //TODO: get user playlists
+const getUserPlaylists = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
   if (!isValidObjectId(userId)) {
@@ -67,8 +67,8 @@ const getPlaylistById = asyncHandler(async (req, res) => {
   );
 });
 
-const addVideoToPlaylist = asyncHandler(async (req, res) => {
   //TODO: add video to Playlist 
+const addVideoToPlaylist = asyncHandler(async (req, res) => {
   const { playlistId, videoId } = req.params;
 
   if (!isValidObjectId(playlistId) || !isValidObjectId(videoId)) {
@@ -99,8 +99,8 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
   );
 });
 
-const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   // TODO: remove video from playlist
+const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   const { playlistId, videoId } = req.params;
 
   if (!isValidObjectId(playlistId) || !isValidObjectId(videoId)) {
@@ -129,8 +129,8 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   );
 });
 
-const deletePlaylist = asyncHandler(async (req, res) => {
   // TODO: delete playlist
+const deletePlaylist = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
 
   if (!isValidObjectId(playlistId)) {
@@ -155,8 +155,8 @@ const deletePlaylist = asyncHandler(async (req, res) => {
   );
 });
 
-const updatePlaylist = asyncHandler(async (req, res) => {
   //TODO: update playlist
+const updatePlaylist = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
   const { name, description } = req.body;
 
