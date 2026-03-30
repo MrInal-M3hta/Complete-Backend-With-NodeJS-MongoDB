@@ -276,7 +276,7 @@ This can be useful to find field with null values<br>
 size<br>
 `db.Cars.find({features:{$size:3}})`
 
-`$all`<br
+`$all`<br>
 &emsp;Return all documents that match the pattern
 (all user with hobbies of play and read)<br>
 `db.Cars.find({features:{$all:["Bluethooth"]}})`
