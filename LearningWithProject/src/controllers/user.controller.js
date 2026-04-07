@@ -274,8 +274,8 @@ const updateUserAvatar = asyncHandler(async(req, res)=>{
     // 🔹 Update DB
     const user = await User.findByIdAndUpdate(
         req.user._id,
-        { avatar: newAvatar.url },
-        { new: true }
+        { $set: { avatar: newAvatar.url } },
+        { new: true, runValidators: true }
     ).select("-password");
 
     return res.status(200).json(
