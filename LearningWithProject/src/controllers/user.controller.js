@@ -38,6 +38,12 @@ const registerUser = asyncHandler(async (req, res)=>{
         throw new ApiError(400, "All fields are Compulsory!!");
     };
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      throw new ApiError(400, "Invalid email type")
+    }
+
     const existedUser = await User.findOne({
         $or: [{username}, {email}]
     })
