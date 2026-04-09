@@ -337,6 +337,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
             $match: {
                 username: username?.toLowerCase()
             }
+            // Find the user whose username = given username
         },
         {
             $lookup: {
@@ -345,6 +346,8 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 foreignField: "channel",
                 as: "subscribers"
             }
+            // Find all documents where:
+            // subscriptions.channel == user._id
         },
         {
             $lookup: {
@@ -353,6 +356,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 foreignField: "subscriber",
                 as: "subscribedTo"
             }
+            // Find all channels this user has subscribed to
         },
         {
             $addFields: {
