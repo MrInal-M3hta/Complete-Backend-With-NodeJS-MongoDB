@@ -38,6 +38,12 @@ const registerUser = asyncHandler(async (req, res)=>{
         throw new ApiError(400, "All fields are Compulsory!!");
     };
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      throw new ApiError(400, "Invalid email type")
+    }
+
     const existedUser = await User.findOne({
         $or: [{username}, {email}]
     })
@@ -274,8 +280,8 @@ const updateUserAvatar = asyncHandler(async(req, res)=>{
     // 🔹 Update DB
     const user = await User.findByIdAndUpdate(
         req.user._id,
-        { avatar: newAvatar.url },
-        { new: true }
+        { $set: { avatar: newAvatar.url } },
+        { new: true, runValidators: true }
     ).select("-password");
 
     return res.status(200).json(
@@ -331,6 +337,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
             $match: {
                 username: username?.toLowerCase()
             }
+            // Find the user whose username = given username
         },
         {
             $lookup: {
@@ -339,6 +346,8 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 foreignField: "channel",
                 as: "subscribers"
             }
+            // Find all documents where:
+            // subscriptions.channel == user._id
         },
         {
             $lookup: {
@@ -347,6 +356,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 foreignField: "subscriber",
                 as: "subscribedTo"
             }
+            // Find all channels this user has subscribed to
         },
         {
             $addFields: {

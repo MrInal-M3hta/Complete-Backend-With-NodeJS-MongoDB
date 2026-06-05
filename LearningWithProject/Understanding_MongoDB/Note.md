@@ -1481,3 +1481,8 @@ _Note_
 | ------ | ------- |
 | $ | Access a field from document |
 | $$ | Access a customer or system variable |
+
+| Operator | Use Case | Works in |
+| -------- | -------- | -------- |
+| $sum | Add values across document or arrays | $group, $project|
+| $add | Add numbers in the same document | $project, $addFields|
